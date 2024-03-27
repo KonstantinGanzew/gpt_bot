@@ -1,0 +1,7 @@
+requests==2.31.0
+python-dotenv==1.0.1
+openai==1.14.3
+#aiogram==3.4.1
+aiogram==2.9
+logging==0.4.9.6
+#aiohttp==3.7.1
