@@ -16,21 +16,10 @@ client = OpenAI(
     base_url=URL_OPENAI,
 )
 
-def balance() -> str:
+async def balance() -> str:
     return r.get(url=f'{URL}proxyapi/balance', headers=HEADERS).json()['balance']
 
-def get_messages(mes: str, user_id: str = 'system') -> str: 
-    return client.chat.completions.create(
-        model = MODELS,
-        messages = [
-            {
-                'role': user_id,
-                "content": mes,
-            }
-        ]
-    ).json()
-
-def get_messages_list(ask: list) -> str: 
+async def get_messages_list(ask: list) -> str: 
     answer = json.loads(client.chat.completions.create(
         model = MODELS,
         messages=ask,
@@ -42,32 +31,3 @@ def get_messages_list(ask: list) -> str:
     ).json())['choices'][0]['message']
     ask.append({'role': answer['role'], 'content': answer['content']})
     return ask
-
-res = balance()
-print(res)
-mess = get_messages_list(
-    [
-        {
-            'role': 'user',
-            'content':'1 слова на асоциации на погон, пегас, точка',
-        }
-    ]
-    )
-print(mess)
-print(balance())
-print(f'Стоймость данного запроса составила: {res - balance()}')
-
-'''
-{
-    'role': 'user',
-    "content": mes,
-},
-{
-    'role': 'assistant',
-    'content': 'Привет! У меня все отлично, спасибо. Как у тебя?',
-},
-{
-    'role': 'user',
-    'content': 'отлично, чем занимаешься',
-}
-'''
