@@ -30,6 +30,8 @@ async def echo(message: Message):
         await bot.send_message(chat_id=message.chat.id, text='Тебе нужна помощь?')
     elif message.text == '/balance':
         await bot.send_message(chat_id=message.chat.id, text=f'Баланс на счете {await balance()}')
+    elif message.text == '/mileage':
+        await bot.send_message(chat_id=message.chat.id, text=f'Последняя замена масла производилась: ')
     else:
         a = [
                 {
@@ -38,4 +40,9 @@ async def echo(message: Message):
                 }
         ]
         c = await get_messages_list(a)
-        await bot.send_message(chat_id=message.chat.id, text=c[-1]['content'])
+        await bot.send_message(chat_id=message.chat.id, text=c[-1]['content'], reply_markup=key.clear_message)
+
+@dp.callback_query_handler(call_datas.clear_callback.filter(item_clear='clear'))
+async def clear_field(call: CallbackQuery):
+    await call.message.edit_text(call.message.text) 
+    await call.answer(text='Запрос сброшен', show_alert=False)

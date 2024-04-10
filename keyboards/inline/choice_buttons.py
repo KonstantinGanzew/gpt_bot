@@ -11,3 +11,11 @@ menu_keyboard = InlineKeyboardMarkup(
         ],
     ]
 )
+
+clear_message = InlineKeyboardMarkup(
+    inline_keyboard = [
+        [
+            InlineKeyboardMarkup(text='Закончить тему', callback_data=key.clear_callback.new(item_clear='clear'))
+        ]
+    ]
+)
