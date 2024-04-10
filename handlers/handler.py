@@ -4,34 +4,50 @@ from loader import dp, bot
 from api_openai import *
 import keyboards.inline.choice_buttons as key
 import keyboards.inline.callback_datas as call_datas
+from bd.sqlite import *
 
 # Обработчик команды start
 async def show_menu(message: Message):
+    logging.info(f'msg = "{message.chat.id}, {message.from_user.username}, {message.text}')
     await bot.send_message(chat_id=message.chat.id, 
                            text='Привет, я тот кто способен помочь тебе...\nВсего пару уточнений.', 
                            reply_markup=key.menu_keyboard)
+
+# Вывод или добавление нового значения для пробега
+async def mileages(user_id, message):
+    if ' ' in message:
+        await set_mileage(user_id, message.split(' ')[1])
+        mileages = message.split(' ')[1]
+    else:
+        mileages = (await get_mileage(user_id))[0][0]
+    await bot.send_message(chat_id=user_id, text=f'Последняя замена масла была: {mileages}')
 
 # Первый пункт    
 @dp.callback_query_handler(call_datas.menu_callback.filter(item_menu='next'))
 async def help_key(call: CallbackQuery, callback_data: dict):
     logging.info(f'call = {callback_data}')
-    await call.message.edit_text('Я бот OpenAi,\
-                                 создан @kureed для облегчения жизни, так как всякие ресурсы OpenAi либо имеют бешаные\
-                                 цены, либо работают 1 день, было решено взять свой токен и попробовать общение через \
-                                 него.\nЧтобы продолжить нажмите help')
+    await call.message.edit_text('Я бот OpenAi,\nсоздан @kureed для облегчения жизни, так как всякие ресурсы OpenAi либо имеют бешаные цены, либо работают 1 день, было решено взять свой токен и попробовать общение через него.\nЧтобы продолжить нажмите help')
+    await call.answer()
+
+@dp.callback_query_handler(call_datas.menu_callback.filter(item_menu='communication'))
+async def communication(call: CallbackQuery, callback_data: dict):
+    logging.info(f'call = {callback_data}')
+    await call.message.edit_text('Для общения с ботом, напишите сообщение, я постараюсь ответить')
     await call.answer()
 
 # Тестовый вариант обращения к чат гпт и прочим штукам, в дальнейшем все предположительно будет проходить тут
 @dp.message_handler(content_types=['text'])
 async def echo(message: Message):
+    logging.info(f'msg = "{message.chat.id}, {message.from_user.username}, {message.text}')
     if  message.text == '/start':
+        await create_profile(message.chat.id)
         await show_menu(message)
     elif message.text == '/help':
         await bot.send_message(chat_id=message.chat.id, text='Тебе нужна помощь?')
     elif message.text == '/balance':
         await bot.send_message(chat_id=message.chat.id, text=f'Баланс на счете {await balance()}')
-    elif message.text == '/mileage':
-        await bot.send_message(chat_id=message.chat.id, text=f'Последняя замена масла производилась: ')
+    elif '/mileage' in message.text:
+        await mileages(message.chat.id, message.text)
     else:
         a = [
                 {
@@ -43,6 +59,7 @@ async def echo(message: Message):
         await bot.send_message(chat_id=message.chat.id, text=c[-1]['content'], reply_markup=key.clear_message)
 
 @dp.callback_query_handler(call_datas.clear_callback.filter(item_clear='clear'))
-async def clear_field(call: CallbackQuery):
+async def clear_field(call: CallbackQuery, callback_data: dict):
+    logging.info(f'call = {callback_data}')
     await call.message.edit_text(call.message.text) 
     await call.answer(text='Запрос сброшен', show_alert=False)
