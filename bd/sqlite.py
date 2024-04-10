@@ -17,7 +17,6 @@ async def create_profile(user_id):
         user = cur.execute(f"SELECT 1 FROM user_data WHERE user_id == '{int(user_id)}'").fetchone()
         if not user:
             cur.execute('INSERT INTO user_data VALUES(?, ?, ?)', (int(user_id), 0, ''))
-            db.commit()
         return cur.fetchall()
 
 # Установить пробег
