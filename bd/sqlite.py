@@ -33,3 +33,15 @@ async def get_mileage(user_id):
         cur.execute(f'SELECT last_mileage FROM user_data WHERE user_id={int(user_id)}')
         return cur.fetchall()
 
+async def set_message(user_id, message):
+    with sq.connect(r'.\bd\base\\user_data.db') as con:
+        cur = con.cursor()
+        cur.execute(f'UPDATE user_data SET message=\'{message}\' WHERE user_id={int(user_id)}')
+        return cur.fetchall()
+
+async def get_message(user_id):
+    with sq.connect(r'.\bd\base\\user_data.db') as con:
+        cur = con.cursor()
+        cur.execute(f'SELECT message FROM user_data WHERE user_id={int(user_id)}')
+        return cur.fetchall()
+    

@@ -22,6 +22,15 @@ async def mileages(user_id, message):
         mileages = (await get_mileage(user_id))[0][0]
     await bot.send_message(chat_id=user_id, text=f'Последняя замена масла была: {mileages}')
 
+async def content(user_id, message):
+    history = json.loads((await get_message(user_id))[0][0])
+    history.append({'role': 'user','content': message})
+    contents = await get_messages_list(history)
+    await bot.send_message(chat_id=user_id,
+                           text=contents[-1]['content'],
+                           reply_markup=key.clear_message)
+    await set_message(user_id, json.dumps(content))
+
 # Первый пункт    
 @dp.callback_query_handler(call_datas.menu_callback.filter(item_menu='next'))
 async def help_key(call: CallbackQuery, callback_data: dict):
@@ -34,6 +43,13 @@ async def communication(call: CallbackQuery, callback_data: dict):
     logging.info(f'call = {callback_data}')
     await call.message.edit_text('Для общения с ботом, напишите сообщение, я постараюсь ответить')
     await call.answer()
+
+@dp.callback_query_handler(call_datas.clear_callback.filter(item_clear='clear'))
+async def clear_field(call: CallbackQuery, callback_data: dict):
+    logging.info(f'call = {callback_data}')
+    await call.message.edit_text(call.message.text) 
+    await set_message(call.from_user.id, '[]')
+    await call.answer(text='Запрос сброшен', show_alert=False)
 
 # Тестовый вариант обращения к чат гпт и прочим штукам, в дальнейшем все предположительно будет проходить тут
 @dp.message_handler(content_types=['text'])
@@ -49,17 +65,4 @@ async def echo(message: Message):
     elif '/mileage' in message.text:
         await mileages(message.chat.id, message.text)
     else:
-        a = [
-                {
-                    'role': 'user',
-                    'content': message.text,
-                }
-        ]
-        c = await get_messages_list(a)
-        await bot.send_message(chat_id=message.chat.id, text=c[-1]['content'], reply_markup=key.clear_message)
-
-@dp.callback_query_handler(call_datas.clear_callback.filter(item_clear='clear'))
-async def clear_field(call: CallbackQuery, callback_data: dict):
-    logging.info(f'call = {callback_data}')
-    await call.message.edit_text(call.message.text) 
-    await call.answer(text='Запрос сброшен', show_alert=False)
+        await content(message.chat.id, message.text)
