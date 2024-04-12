@@ -23,19 +23,28 @@ async def mileages(user_id, message):
     await bot.send_message(chat_id=user_id, text=f'Последняя замена масла была: {mileages}')
 
 async def content(user_id, message):
+    previous = await bot.send_message(chat_id=user_id, text='Нейросеть генерирует ответ')
     history = json.loads((await get_message(user_id))[0][0])
     history.append({'role': 'user','content': message})
     contents = await get_messages_list(history)
-    await bot.send_message(chat_id=user_id,
+    await bot.edit_message_text(chat_id=user_id, message_id=previous.message_id,
                            text=contents[-1]['content'],
                            reply_markup=key.clear_message)
-    await set_message(user_id, json.dumps(content))
+    await set_message(user_id, json.dumps(contents))
+
+async def help(user_id):
+    await bot.send_message(chat_id=user_id, text='Список команд:\
+                           \n/start активировать бота\
+                           \n/help ввывод список команд\
+                           \n/balance покажет текущий баланс\
+                           \n/mileage без параметров покажет пробег в который осуществлялось замена масла, если он был проставлен заранее. /mileage число задаст новый параметр\
+                           \nНапишите любой интересующий вас вопрос, бот постарается ответить, если вас больше не интересует данная тема нажмите "Закончить тему"')
 
 # Первый пункт    
 @dp.callback_query_handler(call_datas.menu_callback.filter(item_menu='next'))
 async def help_key(call: CallbackQuery, callback_data: dict):
     logging.info(f'call = {callback_data}')
-    await call.message.edit_text('Я бот OpenAi,\nсоздан @kureed для облегчения жизни, так как всякие ресурсы OpenAi либо имеют бешаные цены, либо работают 1 день, было решено взять свой токен и попробовать общение через него.\nЧтобы продолжить нажмите help')
+    await call.message.edit_text('Я бот OpenAi,\nсоздан @kureed для облегчения жизни, так как всякие ресурсы OpenAi либо имеют бешаные цены, либо работают 1 день, было решено взять свой токен и попробовать общение через него.\nЧтобы продолжить напишите любой вопрос.')
     await call.answer()
 
 @dp.callback_query_handler(call_datas.menu_callback.filter(item_menu='communication'))
@@ -59,7 +68,7 @@ async def echo(message: Message):
         await create_profile(message.chat.id)
         await show_menu(message)
     elif message.text == '/help':
-        await bot.send_message(chat_id=message.chat.id, text='Тебе нужна помощь?')
+        await help(message.chat.id)
     elif message.text == '/balance':
         await bot.send_message(chat_id=message.chat.id, text=f'Баланс на счете {await balance()}')
     elif '/mileage' in message.text:

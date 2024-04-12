@@ -6,7 +6,7 @@ from openai import OpenAI
 HEADERS = {'Authorization': f'Bearer {TOKEN}'}
 
 TEMPERATURE = 0.5
-MAX_TOKENS = 1000
+MAX_TOKENS = 4096
 TOP_P = 1.0
 FREQUENCY_PENALTY = 0.5
 PRESENCE_PENALTY = 0.0

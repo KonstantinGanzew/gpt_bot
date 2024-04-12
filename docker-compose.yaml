@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+  bot_tg:
+    image: kureed/gpt_bot:latest
+    restart: always
+    container_name: bot_gpt
+    volume:
+      - ./.env:/bot/.env
+      - ./bd/:/bot/bd/base/
