@@ -1,5 +1,6 @@
 import logging
 from aiogram.types import Message, CallbackQuery
+from aiogram.utils import markdown
 from loader import dp, bot
 from api_openai import *
 import keyboards.inline.choice_buttons as key
@@ -28,8 +29,7 @@ async def content(user_id, message):
     history.append({'role': 'user','content': message})
     contents = await get_messages_list(history)
     await bot.edit_message_text(chat_id=user_id, message_id=previous.message_id,
-                           text=contents[-1]['content'],
-                           reply_markup=key.clear_message)
+                           text=contents[-1]['content'], reply_markup=key.clear_message)
     await set_message(user_id, json.dumps(contents))
 
 async def help(user_id):

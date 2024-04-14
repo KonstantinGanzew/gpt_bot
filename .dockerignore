@@ -5,3 +5,5 @@ user_data.db
 log
 .dockerignore
 .gitignore
+Dockerfile
+docker-compose.yaml
