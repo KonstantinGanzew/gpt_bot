@@ -5,14 +5,17 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
+
+async def on_process_message(message: types.Message, data: dict):
+    if message.from_user.id not in ID_TG_ADMINS:
+        raise CancelHandler()
+
+
 class AuthMiddleware(BaseMiddleware):
-    def  __init__(self):
+    def __init__(self):
         BaseMiddleware.__init__(self)
-    
-    async def on_process_message(self, message: types.Message, data: dict):
-        if message.from_user.id not in ID_TG_ADMINS:
-            raise CancelHandler()
-        
+
+
 bot = Bot(BOT_TOKEN, parse_mode='HTML')
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)

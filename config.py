@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv('TOKKEN_FOR_PROXY_API')
+TOKEN = os.getenv('TOKEN_PROXY_API')
 URL = os.getenv('URL')
 URL_OPENAI = os.getenv('URL_OPENAI')
 MODELS = os.getenv('MODELS')
